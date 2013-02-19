@@ -1,0 +1,6 @@
+server {
+  server_name kbno.kbase.us;
+    
+  access_log  /var/log/nginx/kbno/access.log main;
+  error_log   /var/log/nginx/kbno/error.log;
+

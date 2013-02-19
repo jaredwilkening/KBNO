@@ -1,0 +1,32 @@
+#!/bin/sh
+
+cmd=$1
+
+generate_conf() {
+    cat prefix.template locations/*.conf suffix.template
+}
+
+add_location() {
+    ip=$1
+    loc=$2
+    cat location.template | sed -e "s/#IP#/${ip}/g" | sed -e "s/#LOC#/${loc}/g" > locations/${loc}.conf
+}
+export -f add_location
+
+if [ "${cmd}" == "make" ]; then
+    if [ -f "$2" ]; then
+        awk '{system("add_location "$1" "$2)}' < $2
+    fi
+    generate_conf 
+elif [ "${cmd}" == "add" ]; then 
+    add_location $2 $3
+elif [ "${cmd}" == "rm" ] || [ "${cmd}" == "remove" ]; then 
+    rm locations/$2.conf
+else 
+    echo "Usage: $0 cmd [args...]"
+    echo "Commands:"
+    echo "  add <ip> <location>     add end point to conf: <ip> ip address of end point, <location> unique url location string"
+    echo "  rm  <location>          remove end point from conf: <location> unique url location string"
+    echo "  make [optional file]    generate conf: optionally takes a file with ip's and locations"
+    echo "  help                    this message"
+fi
