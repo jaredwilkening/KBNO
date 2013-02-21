@@ -1,0 +1,9 @@
+[shock]
+url="http://127.0.0.1/v1"
+
+[openstack]
+username="ipnb_user"
+password="password123"
+auth_url="http://cloud.example.com:5443/v2_0"
+tenant_name="MyTenant"
+vm_key_name="ipnb_key"
