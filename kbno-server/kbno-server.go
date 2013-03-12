@@ -20,7 +20,12 @@ type hostRes struct {
 func hostHander(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		id := pool.Boot("Jared")
+		id, err := pool.Boot("Jared")
+		if err != nil {
+			println(err.Error())
+			response.InternalServerError(w)
+			return
+		}
 		if h, ok := pool.Running[id]; ok {
 			response.WithData(w, hostRes{ID: id, Url: h.ID, Status: "Active"})
 			return
@@ -47,21 +52,20 @@ func hostHander(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(r.URL.Path[1:], "/")
 		if len(path) > 1 {
 			id := path[1]
-			if _, ok := pool.Running[id]; ok {
-				// openstack delete			    
-				delete(pool.Running, id)
-				return
-			} else if _, ok := pool.Pending[id]; ok {
-				// openstack delete
-				delete(pool.Pending, id)
-				response.OK(w)
-				return
+			if pool.Has(id) {
+				if success, err := pool.Delete(id); success {
+					response.OK(w)
+					return
+				} else {
+					println(err.Error())
+					response.InternalServerError(w)
+					return
+				}
 			} else {
 				response.BadRequestWithMessage(w, "Unable to locate or missing host id")
 				return
 			}
 		}
-		println("delete")
 	default:
 		response.BadRequest(w)
 		return
